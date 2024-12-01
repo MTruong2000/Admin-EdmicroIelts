@@ -7,7 +7,7 @@ import './style.scss';
 const { Search } = Input;
 const { Option } = Select;
 
-const User = () => {
+const Category = () => {
   const [data, setData] = useState([
     {
       key: '1',
@@ -42,24 +42,9 @@ const User = () => {
       key: 'key',
     },
     {
-      title: 'Full Name',
+      title: 'Name',
       dataIndex: 'name',
       key: 'name',
-    },
-    {
-      title: 'Email',
-      dataIndex: 'email',
-      key: 'email',
-    },
-    {
-      title: 'Role',
-      dataIndex: 'role',
-      key: 'role',
-    },
-    {
-      title: 'Phone Number',
-      dataIndex: 'phone',
-      key: 'phone',
     },
     {
       title: 'Status',
@@ -101,4 +86,4 @@ const User = () => {
   );
 };
 
-export default User;
+export default Category;

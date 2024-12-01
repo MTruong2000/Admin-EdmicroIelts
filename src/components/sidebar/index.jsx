@@ -5,8 +5,9 @@ import {
   RiBookLine,
   RiMoneyDollarCircleLine,
   RiLogoutBoxLine,
-} from "react-icons/ri";
-import "./style.scss";
+} from 'react-icons/ri';
+import { Link } from 'react-router-dom';
+import './style.scss';
 
 function Sidebar() {
   return (
@@ -15,13 +16,20 @@ function Sidebar() {
         <h2 className="sidebar-title">Aduca English</h2>
         <ul className="sidebar-menu">
           <li className="menu-item">
-            <RiDashboardLine className="icon" /> Dashboard
+            <Link className="" to={`/`}>
+              <RiDashboardLine className="icon" />
+              Dashboard
+            </Link>
           </li>
           <li className="menu-item">
-            <RiUser3Line className="icon" /> Users
+            <Link className="" to={`/user`}>
+              <RiUser3Line className="icon" /> Users
+            </Link>
           </li>
           <li className="menu-item">
-            <RiListCheck2 className="icon" /> Categories
+            <Link className="" to={`/category`}>
+              <RiListCheck2 className="icon" /> Categories
+            </Link>
           </li>
           <li className="menu-item">
             <RiBookLine className="icon" /> Courses

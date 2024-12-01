@@ -1,6 +1,10 @@
 /* Layout Styles */
 .block-main-layout {
-    width: 100%;
+  width: 100%;
+
+  .main-content-body {
+    transition: margin-left 0.3s;
+  }
 }
 
 .layout {
@@ -9,9 +13,6 @@
   font-family: Arial, sans-serif;
 }
 
-
 .main-content-body.sidebar-open {
-    margin-left: 292px;
-  }
-
-
+  margin-left: 292px;
+}
