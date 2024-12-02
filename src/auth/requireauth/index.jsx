@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from "react";
-import { Navigate } from "react-router-dom";
-import Cookies from "js-cookie";
-import axios from "axios";
+import { useState, useEffect } from 'react';
+import { Navigate } from 'react-router-dom';
+import Cookies from 'js-cookie';
+import axios from 'axios';
 
 const RequireAuth = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
-  const jwtToken = Cookies.get("jwtToken");
-  const refreshToken = Cookies.get("refreshToken");
+  const jwtToken = Cookies.get('jwtToken');
+  const refreshToken = Cookies.get('refreshToken');
 
   useEffect(() => {
     const verifyToken = async () => {
@@ -20,21 +20,17 @@ const RequireAuth = ({ children }) => {
       } catch (error) {
         console.log(error);
         const response = await axios.post(
-          `${
-            import.meta.env.VITE_DOMAIN
-          }api/User/RefreshJwt?refreshToken=${refreshToken}`
+          `${import.meta.env.VITE_DOMAIN}api/User/RefreshJwt?refreshToken=${refreshToken}`,
         );
 
-        const expirationDate = new Date(
-          response.data.token.refreshTokenExpiration
-        );
-        Cookies.set("jwtToken", response.data.token.jwtToken, {
-          expires: expirationDate,
-          path: "/",
+        const expirationDate = new Date(response.data.token.refreshTokenExpiration);
+        Cookies.set('jwtToken', response.data.token.jwtToken, {
+          expires: expirationDate + 1,
+          path: '/',
         });
-        Cookies.set("refreshToken", response.data.token.refreshToken, {
-          expires: expirationDate,
-          path: "/",
+        Cookies.set('refreshToken', response.data.token.refreshToken, {
+          expires: expirationDate + 1,
+          path: '/',
         });
 
         setIsAuthenticated(true);
