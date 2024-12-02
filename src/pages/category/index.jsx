@@ -239,11 +239,6 @@ const Category = () => {
         </Button>
         <Space>
           <Search placeholder="Search by name or email" style={{ width: 200 }} />
-          <Select defaultValue="All" style={{ width: 120 }}>
-            <Option value="All">All</Option>
-            <Option value="Active">Active</Option>
-            <Option value="Soft Deleted">Soft Deleted</Option>
-          </Select>
         </Space>
       </div>
       <Table columns={columns} dataSource={listUser} />

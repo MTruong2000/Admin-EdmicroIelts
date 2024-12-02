@@ -35,7 +35,9 @@ function Sidebar() {
             <RiBookLine className="icon" /> Courses
           </li>
           <li className="menu-item">
-            <RiMoneyDollarCircleLine className="icon" /> History Payments
+            <Link className="" to={`/history-payment`}>
+              <RiMoneyDollarCircleLine className="icon" /> History Payments
+            </Link>
           </li>
           <li className="menu-item logout-item">
             <RiLogoutBoxLine className="icon" /> Logout
