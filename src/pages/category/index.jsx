@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Table, Button, Input, Select, Space, Modal, Form } from 'antd';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { PiStorefront } from 'react-icons/pi';
+import { MdOutlineRestore } from 'react-icons/md';
 import Swal from 'sweetalert2';
 import axios from 'axios';
 import './style.scss';
@@ -37,20 +38,48 @@ const Category = () => {
       key: 'actions',
       render: (text, record) => (
         <Space>
-          <Button icon={<EditOutlined />} onClick={() => handleEdit(record)} />
-          <Button icon={<PiStorefront />} onClick={() => handleSoftDelete(record.id)} />
-          <Button icon={<DeleteOutlined />} danger onClick={() => handleHardDelete(record.id)} />
+          {!record.isDeleted && (
+            <>
+              <Button icon={<EditOutlined />} onClick={() => handleEdit(record)} />
+              <Button icon={<PiStorefront />} onClick={() => handleSoftDelete(record.id)} />
+              <Button icon={<DeleteOutlined />} danger onClick={() => handleHardDelete(record.id)} />
+            </>
+          )}
+          {record.isDeleted && (
+            <>
+              <Button icon={<MdOutlineRestore />} onClick={() => handleRestore(record.id)} />
+            </>
+          )}
         </Space>
       ),
     },
   ];
+  const handleRestore = async (id) => {
+    try {
+      const response = await axios.put(`${import.meta.env.VITE_DOMAIN}api/Category/Restore/${id}`);
+      Swal.fire({
+        position: 'center',
+        icon: 'success',
+        title: response.data,
+        showConfirmButton: false,
+        timer: 1500,
+      });
+      getUserAPI();
+    } catch (error) {
+      Swal.fire({
+        title: 'Request Fail ?',
+        text: error,
+        icon: 'error',
+      });
+    }
+  };
   const handleSoftDelete = async (id) => {
     try {
       const response = await axios.delete(`${import.meta.env.VITE_DOMAIN}api/Category/SoftDelete/${id}`);
       Swal.fire({
         position: 'center',
         icon: 'success',
-        title: response.data.message,
+        title: response.data,
         showConfirmButton: false,
         timer: 1500,
       });
@@ -90,7 +119,6 @@ const Category = () => {
   const getUserAPI = async () => {
     try {
       const response = await axios.get(`${import.meta.env.VITE_DOMAIN}api/Category`);
-      console.log(response.data);
       const newData = updateStatus(response.data);
       setListUser(newData);
     } catch (error) {
@@ -153,8 +181,7 @@ const Category = () => {
     };
 
     try {
-      const response = await axios.post(`${import.meta.env.VITE_DOMAIN}api/Category`, params);
-      console.log(response);
+      await axios.post(`${import.meta.env.VITE_DOMAIN}api/Category`, params);
       Swal.fire({
         position: 'center',
         icon: 'success',
@@ -175,8 +202,6 @@ const Category = () => {
   };
 
   const handleSaveEdit = async () => {
-    console.log(selectedUser);
-
     const params = {
       name: selectedUser.name,
       isDeleted: selectedUser.isDeleted,
