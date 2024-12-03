@@ -41,7 +41,6 @@ const HistoryPayment = () => {
   const getUserAPI = async () => {
     try {
       const response = await axios.get(`${import.meta.env.VITE_DOMAIN}api/Payment/PaymentHistories`);
-      console.log(response.data);
       setListUser(response.data);
     } catch (error) {
       console.error(error);

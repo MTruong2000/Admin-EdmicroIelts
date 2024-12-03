@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Table, Button, Input, Select, Space, Modal, Form } from 'antd';
+import { Table, Button, Input, Space, Modal, Form } from 'antd';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { PiStorefront } from 'react-icons/pi';
 import { MdOutlineRestore } from 'react-icons/md';
@@ -8,9 +8,9 @@ import axios from 'axios';
 import './style.scss';
 
 const { Search } = Input;
-const { Option } = Select;
 
 const Category = () => {
+  const [form] = Form.useForm();
   const [fullName, setFullName] = useState('');
   const [listUser, setListUser] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -30,8 +30,10 @@ const Category = () => {
     },
     {
       title: 'Status',
-      dataIndex: 'status',
-      key: 'status',
+      dataIndex: 'isDeleted',
+      key: 'isDeleted',
+      render: (isDeleted) =>
+        isDeleted ? <div className="status-softdelete">SoftDelete</div> : <div className="status-active">Active</div>,
     },
     {
       title: 'Actions',
@@ -102,25 +104,10 @@ const Category = () => {
     setSelectedUser(null);
   };
 
-  const updateStatus = (data) => {
-    data.forEach((user) => {
-      switch (user.isDeleted) {
-        case true:
-          user.status = 'Soft Delete';
-          break;
-        case false:
-          user.status = 'Active';
-          break;
-      }
-    });
-    return data;
-  };
-
   const getUserAPI = async () => {
     try {
       const response = await axios.get(`${import.meta.env.VITE_DOMAIN}api/Category`);
-      const newData = updateStatus(response.data);
-      setListUser(newData);
+      setListUser(response.data);
     } catch (error) {
       console.error(error);
     }
@@ -129,11 +116,9 @@ const Category = () => {
   useEffect(() => {
     getUserAPI();
   }, []);
-  const resetModal = () => {
-    setFullName('');
-  };
+
   const showModal = () => {
-    resetModal();
+    form.resetFields();
     setIsModalOpen(true);
   };
 
@@ -256,7 +241,7 @@ const Category = () => {
           </Button>,
         ]}
       >
-        <Form layout="vertical">
+        <Form layout="vertical" form={form}>
           <Form.Item label="" name="fullName" required>
             <Input placeholder="Enter  name" value={fullName} onChange={(e) => setFullName(e.target.value)} />
           </Form.Item>

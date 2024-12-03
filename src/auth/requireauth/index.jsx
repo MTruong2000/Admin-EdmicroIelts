@@ -25,11 +25,11 @@ const RequireAuth = ({ children }) => {
 
         const expirationDate = new Date(response.data.token.refreshTokenExpiration);
         Cookies.set('jwtToken', response.data.token.jwtToken, {
-          expires: expirationDate + 1,
+          expires: expirationDate,
           path: '/',
         });
         Cookies.set('refreshToken', response.data.token.refreshToken, {
-          expires: expirationDate + 1,
+          expires: expirationDate,
           path: '/',
         });
 

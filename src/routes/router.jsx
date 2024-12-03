@@ -6,6 +6,7 @@ import Login from '../pages/login';
 import DashBoard from '../pages/dashboard';
 import Category from '../pages/category';
 import HistoryPayment from '../pages/historypayment';
+import CourseManagement from '../pages/coursemanagement';
 
 const router = createBrowserRouter([
   {
@@ -20,6 +21,7 @@ const router = createBrowserRouter([
       { path: 'user', element: <User /> },
       { path: 'category', element: <Category /> },
       { path: 'history-payment', element: <HistoryPayment /> },
+      { path: 'course', element: <CourseManagement /> },
     ],
   },
   {

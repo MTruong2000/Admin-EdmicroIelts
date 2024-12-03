@@ -32,7 +32,9 @@ function Sidebar() {
             </Link>
           </li>
           <li className="menu-item">
-            <RiBookLine className="icon" /> Courses
+            <Link className="" to={`/course`}>
+              <RiBookLine className="icon" /> Courses
+            </Link>
           </li>
           <li className="menu-item">
             <Link className="" to={`/history-payment`}>

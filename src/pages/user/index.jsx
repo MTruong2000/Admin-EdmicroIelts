@@ -11,6 +11,8 @@ const { Search } = Input;
 const { Option } = Select;
 
 const User = () => {
+  const [form] = Form.useForm();
+
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -40,6 +42,7 @@ const User = () => {
       title: 'Role',
       dataIndex: 'role',
       key: 'role',
+      render: (role) => <div className="category-name-cus">{role}</div>,
     },
     {
       title: 'Phone Number',
@@ -48,8 +51,10 @@ const User = () => {
     },
     {
       title: 'Status',
-      dataIndex: 'status',
-      key: 'status',
+      dataIndex: 'isDeleted',
+      key: 'isDeleted',
+      render: (isDeleted) =>
+        isDeleted ? <div className="status-softdelete">SoftDelete</div> : <div className="status-active">Active</div>,
     },
     {
       title: 'Actions',
@@ -65,7 +70,7 @@ const User = () => {
           )}
           {record.isDeleted && (
             <>
-              <Button icon={<MdOutlineRestore />} onClick={() => handleRestore(record)} />
+              <Button icon={<MdOutlineRestore />} onClick={() => handleRestore(record.id)} />
             </>
           )}
         </Space>
@@ -78,7 +83,7 @@ const User = () => {
       Swal.fire({
         position: 'center',
         icon: 'success',
-        title: response.data,
+        title: response.data.message,
         showConfirmButton: false,
         timer: 1500,
       });
@@ -137,42 +142,21 @@ const User = () => {
     });
     return data;
   };
-  const updateStatus = (data) => {
-    data.forEach((user) => {
-      switch (user.isDeleted) {
-        case true:
-          user.status = 'Soft Delete';
-          break;
-        case false:
-          user.status = 'Active';
-          break;
-      }
-    });
-    return data;
-  };
 
+  useEffect(() => {
+    getUserAPI();
+  }, []);
   const getUserAPI = async () => {
     try {
       const response = await axios.get(`${import.meta.env.VITE_DOMAIN}api/User`);
-      const newData = updateStatus(response.data);
-
-      setListUser(updateRole(newData));
+      setListUser(updateRole(response.data));
     } catch (error) {
       console.error(error);
     }
   };
 
-  useEffect(() => {
-    getUserAPI();
-  }, []);
-  const resetModal = () => {
-    setFullName('');
-    setEmail('');
-    setPhoneNumber('');
-    setPassWord('');
-  };
   const showModal = () => {
-    resetModal();
+    form.resetFields();
     setIsModalOpen(true);
   };
 
@@ -304,7 +288,7 @@ const User = () => {
           </Button>,
         ]}
       >
-        <Form layout="vertical">
+        <Form layout="vertical" form={form}>
           <Form.Item label="Full Name" name="fullName" required>
             <Input placeholder="Enter full name" value={fullName} onChange={(e) => setFullName(e.target.value)} />
           </Form.Item>
@@ -334,21 +318,21 @@ const User = () => {
         {selectedUser && (
           <form onSubmit={handleSaveEdit}>
             <label>
-              Full Name:
+              Full Name
               <Input
                 value={selectedUser.fullName}
                 onChange={(e) => setSelectedUser({ ...selectedUser, fullName: e.target.value })}
               />
             </label>
             <label>
-              Email:
+              Email
               <Input
                 value={selectedUser.email}
                 onChange={(e) => setSelectedUser({ ...selectedUser, email: e.target.value })}
               />
             </label>
             <label>
-              Phone Number:
+              Phone Number
               <Input
                 value={selectedUser.phoneNumber}
                 onChange={(e) => setSelectedUser({ ...selectedUser, phoneNumber: e.target.value })}

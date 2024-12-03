@@ -29,7 +29,7 @@ const Header = ({ isSidebarOpen, toggleSidebar }) => {
 
     fetchDataAccount();
   }, []);
-  console.log(infoAccount);
+
   return (
     <>
       <div className="block-main-layout">

@@ -115,7 +115,7 @@ blockquote:before,
 blockquote:after,
 q:before,
 q:after {
-  content: "";
+  content: '';
   content: none;
 }
 table {
@@ -161,4 +161,31 @@ body {
 
 .fw-custom {
   font-weight: bolder;
+}
+
+.category-name-cus {
+  color: #3051b7;
+  font-weight: bold;
+  padding: 4px 8px;
+  background: #dbeafe;
+  text-align: center;
+  border-radius: 10px;
+}
+
+.status-active {
+  color: #2d7749;
+  font-weight: bold;
+  padding: 4px 8px;
+  background: #dcfce7;
+  text-align: center;
+  border-radius: 10px;
+}
+
+.status-softdelete {
+  color: #aa3c3c;
+  font-weight: bold;
+  padding: 4px 8px;
+  background: #fee2e2;
+  text-align: center;
+  border-radius: 10px;
 }
