@@ -25,13 +25,25 @@ function Login() {
       const response = await axios.post(
         `${import.meta.env.VITE_DOMAIN}api/User/Login?email=${email}&password=${passWord}`,
       );
-
+      console.log('Login success:', response.data);
+      if (response.data.token.userRole === 'Student') {
+        Swal.fire({
+          title: 'Login Fail ?',
+          text: 'You are not allowed to access this page',
+          icon: 'error',
+        });
+        return;
+      }
       const expirationDate = new Date(response.data.token.refreshTokenExpiration);
       Cookies.set('jwtToken', response.data.token.jwtToken, {
         expires: expirationDate,
         path: '/',
       });
       Cookies.set('refreshToken', response.data.token.refreshToken, {
+        expires: expirationDate,
+        path: '/',
+      });
+      Cookies.set('userRole', response.data.token.userRole, {
         expires: expirationDate,
         path: '/',
       });
@@ -44,7 +56,11 @@ function Login() {
       });
 
       setTimeout(() => {
-        navigate('/');
+        if (response.data.token.userRole === 'Teacher') {
+          navigate('/course-teacher');
+        } else {
+          navigate('/');
+        }
       }, 2000);
     } catch (error) {
       Swal.fire({

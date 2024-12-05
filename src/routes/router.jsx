@@ -7,6 +7,9 @@ import DashBoard from '../pages/dashboard';
 import Category from '../pages/category';
 import HistoryPayment from '../pages/historypayment';
 import CourseManagement from '../pages/coursemanagement';
+import CourseTeacher from '../pages/courseteacher';
+import Lesson from '../pages/lesson';
+import LessonVideo from '../pages/lessonvideo';
 
 const router = createBrowserRouter([
   {
@@ -22,6 +25,9 @@ const router = createBrowserRouter([
       { path: 'category', element: <Category /> },
       { path: 'history-payment', element: <HistoryPayment /> },
       { path: 'course', element: <CourseManagement /> },
+      { path: 'course-teacher', element: <CourseTeacher /> },
+      { path: 'lesson/:id', element: <Lesson /> },
+      { path: 'lesson-video/:id', element: <LessonVideo /> },
     ],
   },
   {
