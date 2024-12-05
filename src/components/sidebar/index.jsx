@@ -60,11 +60,6 @@ function Sidebar() {
               <FaRegFileAlt className="icon" /> Test
             </Link>
           </li>
-          <li className="menu-item">
-            <Link className="" to={`/history-payment`}>
-              <FaFolderOpen className="icon" /> Files
-            </Link>
-          </li>
           <li className="menu-item logout-item">
             <RiLogoutBoxLine className="icon" /> Logout
           </li>
