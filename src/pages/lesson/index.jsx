@@ -53,14 +53,39 @@ const Lesson = () => {
         <Space>
           {!record.isDeleted && (
             <>
-              <Button icon={<EditOutlined />} onClick={() => handleEdit(record)} />
-              <Button icon={<PiStorefront />} onClick={() => handleSoftDelete(record.id)} />
-              <Button icon={<DeleteOutlined />} danger onClick={() => handleHardDelete(record.id)} />
+              <Button
+                icon={<EditOutlined />}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleEdit(record);
+                }}
+              />
+              <Button
+                icon={<PiStorefront />}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleSoftDelete(record.id);
+                }}
+              />
+              <Button
+                icon={<DeleteOutlined />}
+                danger
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleHardDelete(record.id);
+                }}
+              />
             </>
           )}
           {record.isDeleted && (
             <>
-              <Button icon={<MdOutlineRestore />} onClick={() => handleRestore(record.id)} />
+              <Button
+                icon={<MdOutlineRestore />}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRestore(record.id);
+                }}
+              />
             </>
           )}
         </Space>
@@ -245,7 +270,6 @@ const Lesson = () => {
         onRow={(record) => {
           return {
             onClick: () => {
-              console.log(record);
               navigate(`/lesson-video/${record.id}`);
             },
           };

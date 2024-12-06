@@ -111,7 +111,6 @@ const CourseTeacher = () => {
         onRow={(record) => {
           return {
             onClick: () => {
-              console.log(record);
               navigate(`/lesson/${record.id}`);
             },
           };

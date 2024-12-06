@@ -11,10 +11,13 @@ const LessonVideo = () => {
   const { id } = useParams();
 
   const [form] = Form.useForm();
+  const [formEdit] = Form.useForm();
   const [lessonVideo, setLessonVideo] = useState(null);
   const [fileList, setFileList] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalOpenEdit, setIsModalOpenEdit] = useState(false);
+  const [fileListEdit, setFileListEdit] = useState([]);
+
   const [selectedUser, setSelectedUser] = useState(null);
   const columns = [
     {
@@ -40,6 +43,7 @@ const LessonVideo = () => {
   ];
 
   const handleEdit = (user) => {
+    formEdit.resetFields();
     setSelectedUser(user);
     setIsModalOpenEdit(true);
   };
@@ -51,8 +55,7 @@ const LessonVideo = () => {
 
   const getUserAPI = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_DOMAIN}api/LessonVideo/${id}`);
-      console.log(response.data);
+      const response = await axios.get(`${import.meta.env.VITE_DOMAIN}api/LessonVideo/Lesson/${id}`);
       setLessonVideo(response.data);
     } catch (error) {
       console.error(error);
@@ -78,7 +81,7 @@ const LessonVideo = () => {
 
   const handleHardDelete = async (id) => {
     try {
-      const response = await axios.delete(`${import.meta.env.VITE_DOMAIN}api/Lesson/HardDelete/${id}`);
+      const response = await axios.delete(`${import.meta.env.VITE_DOMAIN}api/LessonVideo?videoId=${id}`);
       Swal.fire({
         position: 'center',
         icon: 'success',
@@ -105,83 +108,84 @@ const LessonVideo = () => {
       });
       return;
     }
-    console.log(fileList);
 
-    const newFile = new File([fileList[0]], fileList[0].name, {
-      type: fileList[0].type,
-      lastModified: fileList[0].lastModified,
-    });
-    console.log(newFile);
-    setTimeout(async () => {
-      const params = {
-        Video: newFile,
-        LessonId: id,
-      };
-
-      try {
-        await axios.post(`${import.meta.env.VITE_DOMAIN}api/LessonVideo`, params);
-        Swal.fire({
-          position: 'center',
-          icon: 'success',
-          title: 'Success',
-          showConfirmButton: false,
-          timer: 1500,
-        });
-        getUserAPI();
-        handleOk();
-      } catch (error) {
-        console.error('Login error:', error);
-        Swal.fire({
-          title: 'Fail ?',
-          text: error.response.data.message,
-          icon: 'error',
-        });
-      }
-    }, 2000);
-  };
-
-  const handleSaveEdit = async () => {
-    const params = {
-      title: selectedUser.title,
-      description: selectedUser.description,
-      courseId: id,
-    };
+    const params = new FormData();
+    params.append('Video', fileList[0].originFileObj);
+    params.append('LessonId', id);
     try {
-      const response = await axios.put(`${import.meta.env.VITE_DOMAIN}api/Lesson/?id=${selectedUser.id}`, params, {
+      await axios.post(`${import.meta.env.VITE_DOMAIN}api/LessonVideo`, params, {
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'multipart/form-data',
         },
       });
       Swal.fire({
         position: 'center',
         icon: 'success',
-        title: response.data,
+        title: 'Success',
         showConfirmButton: false,
         timer: 1500,
       });
       getUserAPI();
-      handleCancelEdit();
+      handleOk();
     } catch (error) {
+      console.error('Login error:', error);
       Swal.fire({
-        title: 'Request Fail ?',
-        text: error,
+        title: 'Fail ?',
+        text: error.response.data.message,
+        icon: 'error',
+      });
+    }
+  };
+
+  const handleSaveEdit = async () => {
+    if (fileListEdit.length === 0) {
+      Swal.fire({
+        title: 'Warning: Please Complete All Required Information',
+        text: 'Please upload a file.',
+        icon: 'warning',
+      });
+      return;
+    }
+    const params = new FormData();
+    params.append('Video', fileListEdit[0].originFileObj);
+    params.append('LessonId', id);
+    try {
+      await axios.put(`${import.meta.env.VITE_DOMAIN}api/LessonVideo?videoId=${selectedUser.id}`, params, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      Swal.fire({
+        position: 'center',
+        icon: 'success',
+        title: 'Success',
+        showConfirmButton: false,
+        timer: 1500,
+      });
+      getUserAPI();
+    } catch (error) {
+      console.error('Login error:', error);
+      Swal.fire({
+        title: 'Fail ?',
+        text: error.response.data,
         icon: 'error',
       });
     }
     setIsModalOpenEdit(false);
   };
   const handleChange = ({ fileList: newFileList }) => setFileList(newFileList);
-  const dataSource = [lessonVideo];
+  const handleChangeEdit = ({ fileList: newFileList }) => setFileListEdit(newFileList);
+
   return (
     <>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
-        {!lessonVideo && (
+        {lessonVideo && lessonVideo.length == 0 && (
           <Button type="primary" onClick={showModal}>
             Add New Video
           </Button>
         )}
       </div>
-      {lessonVideo && <Table columns={columns} dataSource={dataSource} />}
+      {lessonVideo && <Table columns={columns} dataSource={lessonVideo.map((user) => ({ ...user, key: user.id }))} />}
       <Modal
         title="Add New Video"
         open={isModalOpen}
@@ -217,53 +221,41 @@ const LessonVideo = () => {
           </Form.Item>
         </Form>
       </Modal>
-      {/* <Modal
-        title="Add Category"
-        open={isModalOpen}
-        onOk={handleSignUp}
-        onCancel={handleCancel}
+
+      <Modal
+        title="Edit Video"
+        open={isModalOpenEdit}
+        onOk={handleSaveEdit}
+        onCancel={handleCancelEdit}
         footer={[
-          <Button key="cancel" onClick={handleCancel}>
+          <Button key="cancel" onClick={handleCancelEdit}>
             Cancel
           </Button>,
-          <Button key="submit" type="primary" onClick={handleSignUp}>
-            Add Video
+          <Button key="submit" type="primary" onClick={handleSaveEdit}>
+            Edit Video
           </Button>,
         ]}
       >
-        <Form layout="vertical" form={form}>
-          <Form.Item label="Title" name="fullName" required>
-            <Input placeholder="Enter Title" value={fullName} onChange={(e) => setFullName(e.target.value)} />
+        <Form layout="vertical" form={formEdit}>
+          <Form.Item
+            label="Upload Video"
+            name="file"
+            valuePropName="fileList"
+            getValueFromEvent={({ fileList }) => fileList}
+            rules={[{ required: true, message: 'Please upload a file!' }]}
+          >
+            <Upload
+              name="video"
+              action="/upload"
+              listType="picture"
+              fileList={fileListEdit}
+              onChange={handleChangeEdit}
+              beforeUpload={() => false}
+            >
+              <Button icon={<UploadOutlined />}>Click to Upload</Button>
+            </Upload>
           </Form.Item>
         </Form>
-      </Modal> */}
-      <Modal title="Edit User Information" open={isModalOpenEdit} onCancel={handleCancelEdit} footer={null}>
-        {selectedUser && (
-          <form onSubmit={handleSaveEdit}>
-            <label>
-              Title
-              <Input
-                value={selectedUser.title}
-                onChange={(e) => setSelectedUser({ ...selectedUser, title: e.target.value })}
-              />
-            </label>
-            <label>
-              Description
-              <Input
-                value={selectedUser.description}
-                onChange={(e) => setSelectedUser({ ...selectedUser, description: e.target.value })}
-              />
-            </label>
-            <div style={{ marginTop: '16px' }}>
-              <Button onClick={handleCancelEdit} style={{ marginRight: '8px' }}>
-                Cancel
-              </Button>
-              <Button type="primary" onClick={handleSaveEdit}>
-                Save
-              </Button>
-            </div>
-          </form>
-        )}
       </Modal>
     </>
   );
