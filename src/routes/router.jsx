@@ -10,6 +10,7 @@ import CourseManagement from '../pages/coursemanagement';
 import CourseTeacher from '../pages/courseteacher';
 import Lesson from '../pages/lesson';
 import LessonVideo from '../pages/lessonvideo';
+import StudentManagement from '../pages/studentmanagement';
 
 const router = createBrowserRouter([
   {
@@ -28,6 +29,7 @@ const router = createBrowserRouter([
       { path: 'course-teacher', element: <CourseTeacher /> },
       { path: 'lesson/:id', element: <Lesson /> },
       { path: 'lesson-video/:id', element: <LessonVideo /> },
+      { path: 'student-management/:id', element: <StudentManagement /> },
     ],
   },
   {

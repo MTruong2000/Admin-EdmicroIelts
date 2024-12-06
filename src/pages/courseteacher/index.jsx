@@ -3,12 +3,14 @@ import { Table, Button, Input, Space } from 'antd';
 import { IoMdPeople } from 'react-icons/io';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import Cookies from 'js-cookie';
 import './style.scss';
 
 const { Search } = Input;
 
 const CourseTeacher = () => {
   const navigate = useNavigate();
+  const userRole = Cookies.get('userRole');
   const [listUser, setListUser] = useState([]);
 
   const columns = [
@@ -69,7 +71,13 @@ const CourseTeacher = () => {
       key: 'actions',
       render: (text, record) => (
         <Space>
-          <Button icon={<IoMdPeople />} onClick={() => handleViewStuden(record)}>
+          <Button
+            icon={<IoMdPeople />}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleViewStuden(record);
+            }}
+          >
             {' '}
             View all students
           </Button>
@@ -79,13 +87,22 @@ const CourseTeacher = () => {
   ];
 
   const handleViewStuden = (record) => {
-    console.log(record);
+    navigate(`/student-management/${record.id}`);
   };
 
   const getUserAPI = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_DOMAIN}api/Course/GetAllCoursesForAdmin`);
-      setListUser(response.data);
+      if (userRole === 'Admin') {
+        const response = await axios.get(`${import.meta.env.VITE_DOMAIN}api/Course/GetAllCoursesForAdmin`);
+        setListUser(response.data);
+      } else {
+        const response = await axios.get(`${import.meta.env.VITE_DOMAIN}api/Course/GetCoursesByInstructor`, {
+          headers: {
+            Authorization: `Bearer ${Cookies.get('jwtToken')}`,
+          },
+        });
+        setListUser(response.data);
+      }
     } catch (error) {
       console.error(error);
     }
