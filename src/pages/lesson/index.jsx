@@ -266,7 +266,7 @@ const Lesson = () => {
       </div>
       <Table
         columns={columns}
-        dataSource={listUser}
+        dataSource={listUser.map((user) => ({ ...user, key: user.id }))}
         onRow={(record) => {
           return {
             onClick: () => {

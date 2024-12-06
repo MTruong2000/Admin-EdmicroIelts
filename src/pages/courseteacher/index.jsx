@@ -98,16 +98,13 @@ const CourseTeacher = () => {
   return (
     <>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
-        {/* <Button type="primary" onClick={showModal}>
-          Add Teacher Account
-        </Button> */}
         <Space>
           <Search placeholder="Search by name or email" style={{ width: 200 }} />
         </Space>
       </div>
       <Table
         columns={columns}
-        dataSource={listUser}
+        dataSource={listUser.map((user) => ({ ...user, key: user.id }))}
         onRow={(record) => {
           return {
             onClick: () => {

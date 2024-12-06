@@ -6,15 +6,62 @@ import {
   RiMoneyDollarCircleLine,
   RiLogoutBoxLine,
 } from 'react-icons/ri';
-import { MdOutlinePlayLesson } from 'react-icons/md';
-import { FaRegFileAlt, FaFolderOpen } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
+import { FaRegFileAlt } from 'react-icons/fa';
+import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import Cookies from 'js-cookie';
 import './style.scss';
+import Swal from 'sweetalert2';
 
 function Sidebar() {
   const userRole = Cookies.get('userRole');
+  const navigate = useNavigate();
 
+  const handleLogout = async () => {
+    const jwtToken = Cookies.get('jwtToken');
+    const refreshToken = Cookies.get('refreshToken');
+
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_DOMAIN}api/User/Logout?refreshToken=${refreshToken}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${jwtToken}`,
+          },
+        },
+      );
+
+      Swal.fire({
+        position: 'center',
+        icon: 'success',
+        title: response.data,
+        showConfirmButton: false,
+        timer: 1500,
+      });
+
+      const cookies = document.cookie.split(';');
+
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i];
+        const eqPos = cookie.indexOf('=');
+        const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+
+        document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/';
+      }
+
+      setTimeout(() => {
+        navigate('/login');
+      }, 2000);
+    } catch (error) {
+      Swal.fire({
+        title: 'Login Fail ?',
+        text: error.response.data,
+        icon: 'error',
+      });
+      console.error('Login error:', error.response.data);
+    }
+  };
   return (
     <>
       <div className="sidebar">
@@ -60,7 +107,7 @@ function Sidebar() {
               <FaRegFileAlt className="icon" /> Test
             </Link>
           </li>
-          <li className="menu-item logout-item">
+          <li className="menu-item logout-item" onClick={handleLogout}>
             <RiLogoutBoxLine className="icon" /> Logout
           </li>
         </ul>
