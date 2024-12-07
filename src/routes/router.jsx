@@ -11,6 +11,7 @@ import CourseTeacher from '../pages/courseteacher';
 import Lesson from '../pages/lesson';
 import LessonVideo from '../pages/lessonvideo';
 import StudentManagement from '../pages/studentmanagement';
+import FinalTest from '../pages/finaltest';
 
 const router = createBrowserRouter([
   {
@@ -30,6 +31,7 @@ const router = createBrowserRouter([
       { path: 'lesson/:id', element: <Lesson /> },
       { path: 'lesson-video/:id', element: <LessonVideo /> },
       { path: 'student-management/:id', element: <StudentManagement /> },
+      { path: 'final-test/:id', element: <FinalTest /> },
     ],
   },
   {

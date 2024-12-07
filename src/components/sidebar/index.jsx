@@ -102,11 +102,6 @@ function Sidebar() {
               <RiBookLine className="icon" /> Course Teacher
             </Link>
           </li>
-          <li className="menu-item">
-            <Link className="" to={`/history-payment`}>
-              <FaRegFileAlt className="icon" /> Test
-            </Link>
-          </li>
           <li className="menu-item logout-item" onClick={handleLogout}>
             <RiLogoutBoxLine className="icon" /> Logout
           </li>

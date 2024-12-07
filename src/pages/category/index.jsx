@@ -7,13 +7,14 @@ import Swal from 'sweetalert2';
 import axios from 'axios';
 import './style.scss';
 
-const { Search } = Input;
-
 const Category = () => {
   const [form] = Form.useForm();
   const [fullName, setFullName] = useState('');
   const [listUser, setListUser] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [searchText, setSearchText] = useState('');
+  const [filteredData, setFilteredData] = useState([]);
 
   const [isModalOpenEdit, setIsModalOpenEdit] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -108,6 +109,7 @@ const Category = () => {
     try {
       const response = await axios.get(`${import.meta.env.VITE_DOMAIN}api/Category`);
       setListUser(response.data);
+      setFilteredData(response.data);
     } catch (error) {
       console.error(error);
     }
@@ -216,6 +218,17 @@ const Category = () => {
     setIsModalOpenEdit(false);
   };
 
+  const handleSearch = (e) => {
+    const value = e.target.value.toLowerCase();
+    setSearchText(value);
+
+    const filtered = listUser.filter((user) =>
+      Object.values(user).some((field) => String(field).toLowerCase().includes(value)),
+    );
+
+    setFilteredData(filtered);
+  };
+
   return (
     <>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
@@ -223,10 +236,15 @@ const Category = () => {
           Add Category
         </Button>
         <Space>
-          <Search placeholder="Search by name or email" style={{ width: 200 }} />
+          <Input
+            placeholder="Tìm kiếm..."
+            value={searchText}
+            onChange={handleSearch}
+            style={{ marginBottom: 16, width: '300px' }}
+          />
         </Space>
       </div>
-      <Table columns={columns} dataSource={listUser} />
+      <Table columns={columns} dataSource={filteredData.map((user) => ({ ...user, key: user.id }))} />
       <Modal
         title="Add Category"
         open={isModalOpen}

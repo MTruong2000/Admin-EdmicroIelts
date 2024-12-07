@@ -8,12 +8,13 @@ import axios from 'axios';
 import TextArea from 'antd/es/input/TextArea';
 import './style.scss';
 
-const { Search } = Input;
-
 const CourseManagement = () => {
   const [form] = Form.useForm();
 
   const [listUser, setListUser] = useState([]);
+
+  const [searchText, setSearchText] = useState('');
+  const [filteredData, setFilteredData] = useState([]);
 
   const [courseTitle, setCourseTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -110,6 +111,7 @@ const CourseManagement = () => {
     try {
       const response = await axios.get(`${import.meta.env.VITE_DOMAIN}api/Course/GetAllCoursesForAdmin`);
       setListUser(response.data);
+      setFilteredData(response.data);
     } catch (error) {
       console.error(error);
     }
@@ -140,14 +142,12 @@ const CourseManagement = () => {
     getTeacherAPI();
   }, []);
   const handleEdit = (record) => {
-    console.log(record);
     setSelectedUser(record);
     setIsModalOpenEdit(true);
   };
   const handleRestore = async (id) => {
     try {
       const response = await axios.put(`${import.meta.env.VITE_DOMAIN}api/Course/Restore/${id}`);
-      console.log(response);
       Swal.fire({
         position: 'center',
         icon: 'success',
@@ -266,6 +266,17 @@ const CourseManagement = () => {
     setIsModalOpenEdit(false);
   };
 
+  const handleSearch = (e) => {
+    const value = e.target.value.toLowerCase();
+    setSearchText(value);
+
+    const filtered = listUser.filter((user) =>
+      Object.values(user).some((field) => String(field).toLowerCase().includes(value)),
+    );
+
+    setFilteredData(filtered);
+  };
+
   return (
     <>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
@@ -273,10 +284,15 @@ const CourseManagement = () => {
           Add Teacher Account
         </Button>
         <Space>
-          <Search placeholder="Search by name or email" style={{ width: 200 }} />
+          <Input
+            placeholder="Tìm kiếm..."
+            value={searchText}
+            onChange={handleSearch}
+            style={{ marginBottom: 16, width: '300px' }}
+          />
         </Space>
       </div>
-      <Table columns={columns} dataSource={listUser} />
+      <Table columns={columns} dataSource={filteredData.map((user) => ({ ...user, key: user.id }))} />
       <Modal
         title="Add New Course"
         open={isModalOpen}
@@ -340,7 +356,6 @@ const CourseManagement = () => {
         </Form>
       </Modal>
       <Modal title="Edit Course" open={isModalOpenEdit} onCancel={handleEditCancel} onOk={handleEditCourse}>
-        {console.log(selectedUser)}
         {
           <Form layout="vertical">
             <Form.Item label="Course Title" name="courseTitle" required>

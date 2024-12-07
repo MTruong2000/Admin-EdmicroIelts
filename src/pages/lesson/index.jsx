@@ -8,9 +8,7 @@ import Swal from 'sweetalert2';
 import axios from 'axios';
 import './style.scss';
 
-const { Search } = Input;
-
-const Lesson = () => {
+const FinalTest = () => {
   const navigate = useNavigate();
   const { id } = useParams();
 
@@ -20,6 +18,8 @@ const Lesson = () => {
 
   const [listUser, setListUser] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchText, setSearchText] = useState('');
+  const [filteredData, setFilteredData] = useState([]);
 
   const [isModalOpenEdit, setIsModalOpenEdit] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -75,6 +75,14 @@ const Lesson = () => {
                   handleHardDelete(record.id);
                 }}
               />
+              <Button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleAddFinalTest(record.id);
+                }}
+              >
+                Add Final Test
+              </Button>
             </>
           )}
           {record.isDeleted && (
@@ -92,6 +100,9 @@ const Lesson = () => {
       ),
     },
   ];
+  const handleAddFinalTest = (id) => {
+    console.log(id);
+  };
   const handleRestore = async (id) => {
     try {
       const response = await axios.put(`${import.meta.env.VITE_DOMAIN}api/Lesson/Restore/${id}`);
@@ -144,6 +155,7 @@ const Lesson = () => {
     try {
       const response = await axios.get(`${import.meta.env.VITE_DOMAIN}api/Lesson/Course/${id}`);
       setListUser(response.data);
+      setFilteredData(response.data);
     } catch (error) {
       console.error(error);
     }
@@ -254,6 +266,17 @@ const Lesson = () => {
     setIsModalOpenEdit(false);
   };
 
+  const handleSearch = (e) => {
+    const value = e.target.value.toLowerCase();
+    setSearchText(value);
+
+    const filtered = listUser.filter((user) =>
+      Object.values(user).some((field) => String(field).toLowerCase().includes(value)),
+    );
+
+    setFilteredData(filtered);
+  };
+
   return (
     <>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
@@ -261,12 +284,17 @@ const Lesson = () => {
           Add Lesson
         </Button>
         <Space>
-          <Search placeholder="Search by name or email" style={{ width: 200 }} />
+          <Input
+            placeholder="Tìm kiếm..."
+            value={searchText}
+            onChange={handleSearch}
+            style={{ marginBottom: 16, width: '300px' }}
+          />
         </Space>
       </div>
       <Table
         columns={columns}
-        dataSource={listUser.map((user) => ({ ...user, key: user.id }))}
+        dataSource={filteredData.map((user) => ({ ...user, key: user.id }))}
         onRow={(record) => {
           return {
             onClick: () => {
@@ -334,4 +362,4 @@ const Lesson = () => {
   );
 };
 
-export default Lesson;
+export default FinalTest;

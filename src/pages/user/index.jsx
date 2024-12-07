@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Table, Button, Input, Select, Space, Modal, Form } from 'antd';
-import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import { Table, Button, Input, Space, Modal, Form } from 'antd';
+import { DeleteOutlined, EditOutlined, SearchOutlined } from '@ant-design/icons';
 import { PiStorefront } from 'react-icons/pi';
 import { MdOutlineRestore } from 'react-icons/md';
 import Swal from 'sweetalert2';
@@ -8,7 +8,6 @@ import axios from 'axios';
 import './style.scss';
 
 const { Search } = Input;
-const { Option } = Select;
 
 const User = () => {
   const [form] = Form.useForm();
@@ -19,6 +18,7 @@ const User = () => {
   const [password, setPassWord] = useState('');
   const [listUser, setListUser] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchText, setSearchText] = useState('');
 
   const [isModalOpenEdit, setIsModalOpenEdit] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -258,20 +258,37 @@ const User = () => {
     setIsModalOpenEdit(false);
   };
 
+  const handleSearchClick = async () => {
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_DOMAIN}api/User?searchString=${searchText}`);
+      setListUser(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
         <Button type="primary" onClick={showModal}>
           Add Teacher Account
         </Button>
-        <Space>
-          <Search placeholder="Search by name or email" style={{ width: 200 }} />
-          <Select defaultValue="All" style={{ width: 120 }}>
-            <Option value="All">All</Option>
-            <Option value="Active">Active</Option>
-            <Option value="Soft Deleted">Soft Deleted</Option>
-          </Select>
-        </Space>
+        <div className="block-student-search">
+          <Input
+            placeholder="Search by name or email"
+            style={{ width: 200 }}
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+          />
+          <SearchOutlined
+            style={{
+              marginLeft: 8,
+              fontSize: 18,
+              cursor: 'pointer',
+            }}
+            onClick={handleSearchClick}
+          />
+        </div>
       </div>
       <Table columns={columns} dataSource={listUser} />
       <Modal

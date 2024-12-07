@@ -6,12 +6,12 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 import './style.scss';
 
-const { Search } = Input;
-
 const CourseTeacher = () => {
   const navigate = useNavigate();
   const userRole = Cookies.get('userRole');
   const [listUser, setListUser] = useState([]);
+  const [searchText, setSearchText] = useState('');
+  const [filteredData, setFilteredData] = useState([]);
 
   const columns = [
     {
@@ -95,6 +95,7 @@ const CourseTeacher = () => {
       if (userRole === 'Admin') {
         const response = await axios.get(`${import.meta.env.VITE_DOMAIN}api/Course/GetAllCoursesForAdmin`);
         setListUser(response.data);
+        setFilteredData(response.data);
       } else {
         const response = await axios.get(`${import.meta.env.VITE_DOMAIN}api/Course/GetCoursesByInstructor`, {
           headers: {
@@ -102,6 +103,7 @@ const CourseTeacher = () => {
           },
         });
         setListUser(response.data);
+        setFilteredData(response.data);
       }
     } catch (error) {
       console.error(error);
@@ -112,16 +114,32 @@ const CourseTeacher = () => {
     getUserAPI();
   }, []);
 
+  const handleSearch = (e) => {
+    const value = e.target.value.toLowerCase();
+    setSearchText(value);
+
+    const filtered = listUser.filter((user) =>
+      Object.values(user).some((field) => String(field).toLowerCase().includes(value)),
+    );
+
+    setFilteredData(filtered);
+  };
+
   return (
     <>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
         <Space>
-          <Search placeholder="Search by name or email" style={{ width: 200 }} />
+          <Input
+            placeholder="Tìm kiếm..."
+            value={searchText}
+            onChange={handleSearch}
+            style={{ marginBottom: 16, width: '300px' }}
+          />
         </Space>
       </div>
       <Table
         columns={columns}
-        dataSource={listUser.map((user) => ({ ...user, key: user.id }))}
+        dataSource={filteredData.map((user) => ({ ...user, key: user.id }))}
         onRow={(record) => {
           return {
             onClick: () => {

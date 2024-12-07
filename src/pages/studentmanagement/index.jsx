@@ -8,9 +8,9 @@ import moment from 'moment';
 import './style.scss';
 
 const StudentManagement = () => {
-  const [searchText, setSearchText] = useState('');
   const { id } = useParams();
   const [listUser, setListUser] = useState([]);
+  const [searchText, setSearchText] = useState('');
 
   const columns = [
     {
