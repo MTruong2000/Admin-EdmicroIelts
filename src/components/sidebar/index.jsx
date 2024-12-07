@@ -6,7 +6,6 @@ import {
   RiMoneyDollarCircleLine,
   RiLogoutBoxLine,
 } from 'react-icons/ri';
-import { FaRegFileAlt } from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Cookies from 'js-cookie';

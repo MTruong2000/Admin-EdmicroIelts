@@ -7,8 +7,6 @@ import Swal from 'sweetalert2';
 import axios from 'axios';
 import './style.scss';
 
-const { Search } = Input;
-
 const User = () => {
   const [form] = Form.useForm();
 

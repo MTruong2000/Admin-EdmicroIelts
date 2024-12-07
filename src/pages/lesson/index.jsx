@@ -1,16 +1,30 @@
 import { useEffect, useState } from 'react';
-import { Table, Button, Input, Space, Modal, Form } from 'antd';
-import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import { Button, Drawer, Input, List, Typography, Layout, Table, Space, Modal, Form } from 'antd';
+import { DeleteOutlined, EditOutlined, MessageOutlined } from '@ant-design/icons';
 import { PiStorefront } from 'react-icons/pi';
 import { MdOutlineRestore } from 'react-icons/md';
 import { useParams, useNavigate } from 'react-router-dom';
+import moment from 'moment';
+import Cookies from 'js-cookie';
 import Swal from 'sweetalert2';
 import axios from 'axios';
 import './style.scss';
 
+const { Sider, Content } = Layout;
+
 const FinalTest = () => {
   const navigate = useNavigate();
   const { id } = useParams();
+  const jwtToken = Cookies.get('jwtToken');
+  const Uid = Cookies.get('Uid');
+  const userRole = Cookies.get('userRole');
+
+  const [visible, setVisible] = useState(false);
+  const [selectedChat, setSelectedChat] = useState(null);
+  const [chatData, setChatData] = useState([]);
+  const [processedData, setProcessedData] = useState([]);
+  const [newMessage, setNewMessage] = useState('');
+  const [messages, setMessages] = useState([]);
 
   const [form] = Form.useForm();
   const [fullName, setFullName] = useState('');
@@ -161,8 +175,83 @@ const FinalTest = () => {
     }
   };
 
+  const fetchDataListChat = async () => {
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_DOMAIN}api/Chat/${id}/messages`, {
+        headers: {
+          Authorization: `Bearer ${jwtToken}`,
+        },
+      });
+      setChatData(response.data);
+    } catch (error) {
+      console.error('Error fetching chat data:', error);
+    }
+  };
+
+  useEffect(() => {
+    const groupedData = chatData.reduce((acc, message) => {
+      acc[message.senderId] = {
+        senderId: message.senderId,
+        senderName: message.senderName,
+        content: message.content,
+        courseId: message.courseId,
+        timestamp: message.timestamp,
+      };
+      return acc;
+    }, {});
+
+    setProcessedData(Object.values(groupedData));
+  }, [chatData]);
+
+  const fetchMessages = async (courseId, studentId) => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_DOMAIN}api/Chat/teacher/${courseId}/messages/${studentId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${jwtToken}`,
+          },
+        },
+      );
+      setMessages(response.data);
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+    }
+  };
+
+  // Xử lý khi click vào một mục trong Sidebar
+  const handleChatSelect = (chat) => {
+    setSelectedChat(chat.senderId);
+
+    const studentId = Uid === chat.senderId.toString() ? chat.receiverId : chat.senderId;
+    const courseId = chat.courseId;
+
+    fetchMessages(courseId, studentId);
+  };
+
+  // Gửi tin nhắn
+  const sendMessage = async () => {
+    if (newMessage.trim() !== '' && selectedChat) {
+      const newChat = [...messages, { senderId: Uid, content: newMessage, timestamp: new Date().toISOString() }];
+      setMessages(newChat);
+      setNewMessage('');
+
+      // Call API to send message
+      try {
+        await axios.post('/api/chat/send', {
+          courseId: processedData.find((item) => item.senderId === selectedChat).courseId,
+          receiverId: selectedChat,
+          content: newMessage,
+        });
+      } catch (error) {
+        console.error('Error sending message:', error);
+      }
+    }
+  };
+
   useEffect(() => {
     getUserAPI();
+    fetchDataListChat();
   }, []);
 
   const showModal = () => {
@@ -358,6 +447,111 @@ const FinalTest = () => {
           </form>
         )}
       </Modal>
+      {userRole === 'Teacher' && (
+        <Button
+          type="primary"
+          shape="circle"
+          icon={<MessageOutlined />}
+          className="btn-chatting"
+          style={{
+            backgroundColor: '#000',
+            borderColor: '#000',
+            color: '#fff',
+            width: '50px',
+            height: '50px',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+          onClick={() => {
+            setSelectedChat(null);
+            setVisible(true);
+          }}
+        />
+      )}
+
+      <Drawer title="Chat" placement="right" width={800} onClose={() => setVisible(false)} visible={visible}>
+        <Layout style={{ height: '100%' }}>
+          <Sider
+            width={300}
+            style={{ backgroundColor: '#f9f9f9', borderRight: '1px solid #e8e8e8', overflowY: 'auto' }}
+          >
+            <List
+              dataSource={processedData}
+              renderItem={(item) => (
+                <List.Item
+                  style={{
+                    cursor: 'pointer',
+                    padding: '16px',
+                    backgroundColor: selectedChat === item.senderId ? '#e6f7ff' : '#fff',
+                  }}
+                  onClick={() => handleChatSelect(item)}
+                >
+                  <List.Item.Meta
+                    title={<Typography.Text strong>{item.senderName}</Typography.Text>}
+                    description={item.content}
+                  />
+                  <Typography.Text type="secondary">{moment(item.timestamp).format('HH:mm A')}</Typography.Text>
+                </List.Item>
+              )}
+            />
+          </Sider>
+
+          <Layout>
+            <Content style={{ padding: '16px', display: 'flex', flexDirection: 'column', height: '100%' }}>
+              {selectedChat ? (
+                <>
+                  <div style={{ flexGrow: 1, overflowY: 'auto', paddingBottom: '16px' }}>
+                    <List
+                      dataSource={messages}
+                      renderItem={(item) => (
+                        <List.Item
+                          style={{
+                            justifyContent: item.senderId.toString() === Uid ? 'flex-end' : 'flex-start',
+                            textAlign: item.senderId.toString() === Uid ? 'right' : 'left',
+                          }}
+                        >
+                          <div
+                            style={{
+                              maxWidth: '70%',
+                              padding: '10px',
+                              borderRadius: '8px',
+                              backgroundColor: item.senderId.toString() === Uid ? '#000' : '#f0f0f0',
+                              color: item.senderId.toString() === Uid ? '#fff' : '#000',
+                            }}
+                          >
+                            <Typography.Text style={{ color: item.senderId.toString() === Uid ? '#fff' : '#000' }}>
+                              {item.content}
+                            </Typography.Text>
+                            <div style={{ fontSize: '12px', marginTop: '5px', opacity: 0.6 }}>
+                              {moment(item.timestamp).format('HH:mm A')}
+                            </div>
+                          </div>
+                        </List.Item>
+                      )}
+                    />
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <Input
+                      placeholder="Type a message..."
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      onPressEnter={sendMessage}
+                    />
+                    <Button type="primary" onClick={sendMessage}>
+                      Send
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <Typography.Text type="secondary" style={{ textAlign: 'center', marginTop: '20px' }}>
+                  Select a chat to start messaging
+                </Typography.Text>
+              )}
+            </Content>
+          </Layout>
+        </Layout>
+      </Drawer>
     </>
   );
 };

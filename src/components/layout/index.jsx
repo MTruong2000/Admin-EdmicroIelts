@@ -1,10 +1,10 @@
 import { useState } from 'react';
+import { Outlet } from 'react-router-dom';
 import Sidebar from '../sidebar';
 import Header from '../header';
-import { Outlet } from 'react-router-dom';
 import './style.scss';
 
-const Layout = () => {
+const LayoutMain = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const toggleSidebar = () => {
@@ -26,4 +26,4 @@ const Layout = () => {
   );
 };
 
-export default Layout;
+export default LayoutMain;
