@@ -25,7 +25,6 @@ function Login() {
       const response = await axios.post(
         `${import.meta.env.VITE_DOMAIN}api/User/Login?email=${email}&password=${passWord}`,
       );
-      console.log('Login success:', response.data);
       if (response.data.token.userRole === 'Student') {
         Swal.fire({
           title: 'Login Fail ?',
@@ -34,17 +33,16 @@ function Login() {
         });
         return;
       }
-      const expirationDate = new Date(response.data.token.refreshTokenExpiration);
       Cookies.set('jwtToken', response.data.token.jwtToken, {
-        expires: expirationDate,
+        expires: 30,
         path: '/',
       });
       Cookies.set('refreshToken', response.data.token.refreshToken, {
-        expires: expirationDate,
+        expires: 30,
         path: '/',
       });
       Cookies.set('userRole', response.data.token.userRole, {
-        expires: expirationDate,
+        expires: 30,
         path: '/',
       });
       Swal.fire({

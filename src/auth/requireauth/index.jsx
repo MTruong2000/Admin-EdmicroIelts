@@ -2,8 +2,12 @@ import { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import axios from 'axios';
+import PropTypes from 'prop-types';
 
 const RequireAuth = ({ children }) => {
+  RequireAuth.propTypes = {
+    children: PropTypes.string,
+  };
   const [isAuthenticated, setIsAuthenticated] = useState(null);
   const jwtToken = Cookies.get('jwtToken');
   const refreshToken = Cookies.get('refreshToken');
@@ -23,13 +27,16 @@ const RequireAuth = ({ children }) => {
           `${import.meta.env.VITE_DOMAIN}api/User/RefreshJwt?refreshToken=${refreshToken}`,
         );
 
-        const expirationDate = new Date(response.data.token.refreshTokenExpiration);
         Cookies.set('jwtToken', response.data.token.jwtToken, {
-          expires: expirationDate,
+          expires: 30,
           path: '/',
         });
         Cookies.set('refreshToken', response.data.token.refreshToken, {
-          expires: expirationDate,
+          expires: 30,
+          path: '/',
+        });
+        Cookies.set('userRole', response.data.token.userRole, {
+          expires: 30,
           path: '/',
         });
 

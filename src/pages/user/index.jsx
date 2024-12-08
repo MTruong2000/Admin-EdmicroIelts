@@ -259,7 +259,7 @@ const User = () => {
   const handleSearchClick = async () => {
     try {
       const response = await axios.get(`${import.meta.env.VITE_DOMAIN}api/User?searchString=${searchText}`);
-      setListUser(response.data);
+      setListUser(updateRole(response.data));
     } catch (error) {
       console.error(error);
     }

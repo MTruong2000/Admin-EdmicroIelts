@@ -10,6 +10,7 @@ import './style.scss';
 
 const CourseManagement = () => {
   const [form] = Form.useForm();
+  const [formEdit] = Form.useForm();
 
   const [listUser, setListUser] = useState([]);
 
@@ -222,9 +223,7 @@ const CourseManagement = () => {
       });
       return;
     }
-    const Id = listUser.pop().id + 1;
     const params = {
-      Id,
       Title: courseTitle,
       Description: description,
       CourseContent: content,
@@ -259,7 +258,64 @@ const CourseManagement = () => {
   };
 
   const handleEditCourse = async () => {
-    console.log(270);
+    if (
+      !selectedUser.title ||
+      !selectedUser.price ||
+      !selectedUser.categoryId ||
+      !selectedUser.teacherName ||
+      !selectedUser.description ||
+      !selectedUser.courseContent ||
+      typeof selectedUser.imageLink === 'string'
+    ) {
+      Swal.fire({
+        title: 'Warning: Please Complete All Required Information',
+        text: 'Please fill in all the information.',
+        icon: 'warning',
+      });
+      return;
+    }
+
+    if (typeof selectedUser.teacherName === 'string') {
+      Swal.fire({
+        title: 'Warning: Please Select Teacher',
+        text: 'Please select a teacher.',
+        icon: 'warning',
+      });
+      return;
+    }
+
+    const params = new FormData();
+    params.append('Id', selectedUser.id);
+    params.append('Title', selectedUser.title);
+    params.append('Description', selectedUser.description);
+    params.append('CourseContent', selectedUser.courseContent);
+    params.append('Image', selectedUser.imageLink); // Nếu là file, đảm bảo đúng kiểu File hoặc Blob
+    params.append('Price', selectedUser.price);
+    params.append('CategoryId', selectedUser.categoryId);
+    params.append('InstructorId', selectedUser.teacherName); // Nếu cần ID giảng viên
+
+    try {
+      const response = await axios.put(`${import.meta.env.VITE_DOMAIN}api/Course/${selectedUser.id}`, params, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      Swal.fire({
+        position: 'center',
+        icon: 'success',
+        title: response.data,
+        showConfirmButton: false,
+        timer: 1500,
+      });
+      getUserAPI();
+      setIsModalOpenEdit(false);
+    } catch (error) {
+      Swal.fire({
+        title: 'Request Fail ?',
+        text: error,
+        icon: 'error',
+      });
+    }
   };
 
   const handleEditCancel = () => {
@@ -277,11 +333,24 @@ const CourseManagement = () => {
     setFilteredData(filtered);
   };
 
+  useEffect(() => {
+    if (selectedUser) {
+      formEdit.setFieldsValue({
+        courseTitle: selectedUser.title,
+        description: selectedUser.description,
+        courseContent: selectedUser.courseContent,
+        price: selectedUser.price,
+        categoryId: selectedUser.categoryId,
+        teacherName: selectedUser.teacherName,
+      });
+    }
+  }, [selectedUser, formEdit]);
+
   return (
     <>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
         <Button type="primary" onClick={showModal}>
-          Add Teacher Account
+          Add Course
         </Button>
         <Space>
           <Input
@@ -356,8 +425,8 @@ const CourseManagement = () => {
         </Form>
       </Modal>
       <Modal title="Edit Course" open={isModalOpenEdit} onCancel={handleEditCancel} onOk={handleEditCourse}>
-        {
-          <Form layout="vertical">
+        {selectedUser && (
+          <Form layout="vertical" form={formEdit}>
             <Form.Item label="Course Title" name="courseTitle" required>
               <Input
                 placeholder="Enter course title"
@@ -372,64 +441,58 @@ const CourseManagement = () => {
                 onChange={(e) => setSelectedUser({ ...selectedUser, description: e.target.value })}
               />
             </Form.Item>
-            <Form.Item label="Content" name="content">
+            <Form.Item label="Content" name="courseContent">
               <TextArea
                 placeholder="Enter course content"
-                value={selectedUser.content}
-                onChange={(e) => setSelectedUser({ ...selectedUser, content: e.target.value })}
+                value={selectedUser.courseContent}
+                onChange={(e) => setSelectedUser({ ...selectedUser, courseContent: e.target.value })}
               />
             </Form.Item>
+            <Form.Item label="Image" name="image">
+              <Input
+                type="file"
+                onChange={(e) => setSelectedUser({ ...selectedUser, imageLink: e.target.files[0] })}
+                accept="image/*"
+              />
+            </Form.Item>
+            <Form.Item label="Price" name="price" required>
+              <Input
+                type="number"
+                placeholder="Enter price"
+                value={selectedUser.price}
+                onChange={(e) => setSelectedUser({ ...selectedUser, price: e.target.value })}
+              />
+            </Form.Item>
+            <Form.Item label="Category" name="categoryId" required>
+              <Select
+                placeholder="Select a category"
+                value={selectedUser.categoryId}
+                onChange={(e) => setSelectedUser({ ...selectedUser, categoryId: e.target.value })}
+              >
+                {listCategory.map((item) => (
+                  <Select.Option key={item.id} value={item.id}>
+                    {item.name}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
+            <Form.Item label="Teacher" name="teacherName" required>
+              <Select
+                placeholder="Select a teacher"
+                value={selectedUser.teacherName}
+                onChange={(id) => {
+                  setSelectedUser({ ...selectedUser, teacherName: id }); // Lưu ID vào teacherName
+                }}
+              >
+                {listTeacher.map((item) => (
+                  <Select.Option key={item.id} value={item.id}>
+                    {item.fullName}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
           </Form>
-        }
-        {/* <Form layout="vertical" form={form}>
-          <Form.Item label="Course Title" name="courseTitle" required>
-            <Input
-              placeholder="Enter course title"
-              value={courseTitle}
-              onChange={(e) => setCourseTitle(e.target.value)}
-            />
-          </Form.Item>
-
-          <Form.Item label="Description" name="description">
-            <TextArea
-              placeholder="Enter course description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-          </Form.Item>
-
-          <Form.Item label="Content" name="content">
-            <TextArea placeholder="Enter course content" value={content} onChange={(e) => setContent(e.target.value)} />
-          </Form.Item>
-
-          <Form.Item label="Image" name="image">
-            <Input type="file" onChange={handleImageChange} accept="image/*" />
-          </Form.Item>
-
-          <Form.Item label="Price" name="price" required>
-            <Input type="number" placeholder="Enter price" value={price} onChange={(e) => setPrice(e.target.value)} />
-          </Form.Item>
-
-          <Form.Item label="Category" name="category" required>
-            <Select value={category} onChange={(value) => setCategory(value)}>
-              {listCategory.map((item) => (
-                <Select.Option key={item.id} value={item.id}>
-                  {item.name}
-                </Select.Option>
-              ))}
-            </Select>
-          </Form.Item>
-
-          <Form.Item label="Teacher" name="teacher" required>
-            <Select value={teacher} onChange={(value) => setTeacher(value)}>
-              {listTeacher.map((item) => (
-                <Select.Option key={item.id} value={item.id}>
-                  {item.firstName} {item.lastName}
-                </Select.Option>
-              ))}
-            </Select>
-          </Form.Item>
-        </Form> */}
+        )}
       </Modal>
     </>
   );
