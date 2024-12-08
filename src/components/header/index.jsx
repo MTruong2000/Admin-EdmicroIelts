@@ -21,7 +21,6 @@ const Header = ({ isSidebarOpen, toggleSidebar }) => {
             Authorization: `Bearer ${jwtToken}`,
           },
         });
-        console.log(response.data);
         Cookies.set('Uid', response.data.id, {
           expires: 30,
           path: '/',

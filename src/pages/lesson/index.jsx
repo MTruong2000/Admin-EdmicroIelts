@@ -219,7 +219,6 @@ const FinalTest = () => {
     }
   };
 
-  // Xử lý khi click vào một mục trong Sidebar
   const handleChatSelect = (chat) => {
     setSelectedChat(chat.senderId);
 
@@ -229,23 +228,31 @@ const FinalTest = () => {
     fetchMessages(courseId, studentId);
   };
 
-  // Gửi tin nhắn
   const sendMessage = async () => {
     if (newMessage.trim() !== '' && selectedChat) {
-      const newChat = [...messages, { senderId: Uid, content: newMessage, timestamp: new Date().toISOString() }];
-      setMessages(newChat);
-      setNewMessage('');
-
-      // Call API to send message
       try {
-        await axios.post('/api/chat/send', {
-          courseId: processedData.find((item) => item.senderId === selectedChat).courseId,
-          receiverId: selectedChat,
-          content: newMessage,
-        });
+        await axios.post(
+          `${import.meta.env.VITE_DOMAIN}api/Chat/send-from-instructor`,
+          {
+            courseId: id,
+            messageContent: newMessage,
+            studentId: selectedChat,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${jwtToken}`,
+            },
+          },
+        );
+        setNewMessage('');
       } catch (error) {
-        console.error('Error sending message:', error);
+        Swal.fire({
+          title: 'Send mess Fail ?',
+          text: error,
+          icon: 'error',
+        });
       }
+      fetchMessages(id, selectedChat);
     }
   };
 
@@ -470,7 +477,7 @@ const FinalTest = () => {
         />
       )}
 
-      <Drawer title="Chat" placement="right" width={800} onClose={() => setVisible(false)} visible={visible}>
+      <Drawer title="Chat" placement="right" width={800} onClose={() => setVisible(false)} open={visible}>
         <Layout style={{ height: '100%' }}>
           <Sider
             width={300}
